@@ -1,0 +1,17 @@
+{
+	"node": "n8n-nodes-base.qBittorrent",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": [
+		"Miscellaneous",
+		"Torrents",
+		"Download"
+	],
+	"resources": {
+		"primaryDocumentation": [
+			{
+				"url": ""
+			}
+		]
+	}
+}
