@@ -31,7 +31,7 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "nodes": [
-      "dist/nodes/HttpBin/QBittorrent.node.js"
+      "dist/nodes/QBittorrent/QBittorrent.node.js"
     ]
   },
   "devDependencies": {
