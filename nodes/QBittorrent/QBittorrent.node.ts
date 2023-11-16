@@ -85,8 +85,26 @@ export class QBittorrent implements INodeType {
 								method: 'POST',
 								url: '/torrents/add',
 								skipSslCertificateValidation: true,
+								headers: {
+									"content-type": "multipart/form-data"
+								},
 								body: {
-									urls: '={{ $parameter["operation"] }}'
+									urls: '={{ $parameter["urls"] }}',
+									savepath: '={{ $parameter["savepath"] }}',
+									cookie: '={{ $parameter["cookie"] }}',
+									category: '={{ $parameter["category"] }}',
+									tags: '={{ $parameter["tags"] }}',
+									skip_checking: '={{ $parameter["skip_checking"] }}',
+									paused: '={{ $parameter["paused"] }}',
+									root_folder: '={{ $parameter["root_folder"] }}',
+									rename: '={{ $parameter["rename"] }}',
+									upLimit: '={{ $parameter["upLimit"] }}',
+									dlLimit: '={{ $parameter["dlLimit"] }}',
+									ratioLimit: '={{ $parameter["ratioLimit"] }}',
+									seedingTimeLimit: '={{ $parameter["seedingTimeLimit"] }}',
+									autoTMM: '={{ $parameter["autoTMM"] }}',
+									sequentialDownload: '={{ $parameter["sequentialDownload"] }}',
+									firstLastPiecePrio: '={{ $parameter["firstLastPiecePrio"] }}',
 								}
 							},
 						},
