@@ -22,7 +22,8 @@
     "format": "prettier nodes --write",
     "lint": "eslint nodes package.json",
     "lintfix": "eslint nodes package.json --fix",
-    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes package.json"
+    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes package.json",
+    "release": "release-it"
   },
   "files": [
     "dist"
@@ -42,6 +43,7 @@
     "n8n-core": "*",
     "n8n-workflow": "*",
     "prettier": "^2.7.1",
+    "release-it": "^17.0.0",
     "typescript": "~4.8.4"
   }
 }
