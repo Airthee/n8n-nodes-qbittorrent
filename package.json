@@ -30,6 +30,9 @@
   ],
   "n8n": {
     "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/nodes/QBittorrent/QBittorrent.credentials.js"
+    ],
     "nodes": [
       "dist/nodes/QBittorrent/QBittorrent.node.js"
     ]
