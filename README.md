@@ -55,6 +55,28 @@ Then, you just need to restart your n8n instance, and you should see the node by
 
 If you are not already familiar with n8n basics, don't hesitate to [Try it out](https://docs.n8n.io/try-it-out/) to get started.
 
+## Usage (for developpers)
+
+Go into your `n8n-nodes-qbittorrent` directory and create a npm-link :  
+
+```bash
+cd <n8n_node_directory>
+npm link # run in sudo if permission denied
+```
+
+Create and init the `custom` directory and install your local node version :  
+
+```bash
+mkdir -p <n8n_directory>/custom # if the directory does not already exist
+cd <n8n_directory>/custom
+npm init # if not already initiated
+npm link n8n-nodes-qbittorrent
+```
+
+Now the QBittorrent node is available in your n8n instance.  
+
+To update the node, run the `npm run build` command from node directory and restart your n8n instance. 
+
 ## Resources
 
 - [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
