@@ -40,42 +40,31 @@ This credential should be your server address and the username / password that h
 
 TODO: _State the minimum n8n version, as well as which versions you test against. You can also include any known version incompatibility issues._
 
-## Usage
-
-Install the node into your configuration :  
-
-```bash
-mkdir -p <n8n_directory>/custom # if the directory does not already exist
-cd <n8n_directory>/custom
-npm init # if not already initiated
-npm install --save n8n-nodes-qbittorrent
-```
-
-Then, you just need to restart your n8n instance, and you should see the node by searching "qBittorrent" in the nodes searchbar.  
-
-If you are not already familiar with n8n basics, don't hesitate to [Try it out](https://docs.n8n.io/try-it-out/) to get started.
-
 ## Usage (for developpers)
 
 Go into your `n8n-nodes-qbittorrent` directory and create a npm-link :  
 
 ```bash
 cd <n8n_node_directory>
-npm link # run in sudo if permission denied
+npm link
 ```
 
-Create and init the `custom` directory and install your local node version :  
+Run your `n8n` instance :  
 
 ```bash
-mkdir -p <n8n_directory>/custom # if the directory does not already exist
-cd <n8n_directory>/custom
-npm init # if not already initiated
+npx n8n
+```
+
+Install the package in your n8n instance :  
+
+```bash
+cd <n8n_directory>/nodes
 npm link n8n-nodes-qbittorrent
 ```
 
-Now the QBittorrent node is available in your n8n instance.  
+Then, restart your `n8n` instance and you should be able to add the node to your workflow.
 
-To update the node, run the `npm run build` command from node directory and restart your n8n instance. 
+After updating the code, run the `npm run build` command from node directory and restart your n8n instance. 
 
 ## Resources
 
@@ -84,7 +73,15 @@ To update the node, run the `npm run build` command from node directory and rest
 
 ## Version history
 
-Current version supports the version 2 of the qBittorrent API.  
+Current version supports the [version 2 of the qBittorrent API](https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-5.0)).  
 If a new qBittorrent API version is released, a new major version of this node will be released.  
 
 TODO: when the node development is completed, we will be on 1.x.y version.
+
+## Supported operations
+
+- application
+  - getApiVersion
+- torrents
+  - getTorrentsList
+  - addTorrent
