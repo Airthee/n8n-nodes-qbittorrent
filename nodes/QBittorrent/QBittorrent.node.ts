@@ -1,5 +1,8 @@
 import { INodeType, INodeTypeDescription } from 'n8n-workflow';
 
+// Documentation
+// https://docs.n8n.io/integrations/creating-nodes/overview/
+
 export class QBittorrent implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'qBittorrent',
@@ -16,7 +19,7 @@ export class QBittorrent implements INodeType {
 			},
 		],
 		defaults: {
-			name: 'qBittorrent'
+			name: 'qBittorrent',
 		},
 		inputs: ['main'],
 		outputs: ['main'],
@@ -74,7 +77,7 @@ export class QBittorrent implements INodeType {
 								url: '/torrents/info',
 								skipSslCertificateValidation: true,
 							},
-						}
+						},
 					},
 					{
 						name: 'Add Torrent',
@@ -86,7 +89,7 @@ export class QBittorrent implements INodeType {
 								url: '/torrents/add',
 								skipSslCertificateValidation: true,
 								headers: {
-									"content-type": "multipart/form-data"
+									'content-type': 'multipart/form-data',
 								},
 								body: {
 									urls: '={{ $parameter["urls"] }}',
@@ -98,17 +101,17 @@ export class QBittorrent implements INodeType {
 									paused: '={{ $parameter["paused"] }}',
 									root_folder: '={{ $parameter["root_folder"] }}',
 									rename: '={{ $parameter["rename"] }}',
-									upLimit: '={{ $parameter["upLimit"] }}',
-									dlLimit: '={{ $parameter["dlLimit"] }}',
-									ratioLimit: '={{ $parameter["ratioLimit"] }}',
-									seedingTimeLimit: '={{ $parameter["seedingTimeLimit"] }}',
-									autoTMM: '={{ $parameter["autoTMM"] }}',
+									upLimit: '={{ $parameter["upLimit"].toString() }}',
+									dlLimit: '={{ $parameter["dlLimit"].toString() }}',
+									ratioLimit: '={{ $parameter["ratioLimit"].toString() }}',
+									seedingTimeLimit: '={{ $parameter["seedingTimeLimit"].toString() }}',
+									autoTMM: '={{ $parameter["autoTMM"] ? "true" : "false" }}',
 									sequentialDownload: '={{ $parameter["sequentialDownload"] }}',
 									firstLastPiecePrio: '={{ $parameter["firstLastPiecePrio"] }}',
-								}
+								},
 							},
 						},
-					}
+					},
 				],
 				default: 'addTorrent',
 			},
@@ -137,7 +140,7 @@ export class QBittorrent implements INodeType {
 								skipSslCertificateValidation: true,
 							},
 						},
-					}
+					},
 				],
 				default: 'getApiVersion',
 			},
@@ -235,7 +238,8 @@ export class QBittorrent implements INodeType {
 						resource: ['torrents'],
 					},
 				},
-				description: 'Add torrents in the paused state. Possible values are "true", "false" (default).',
+				description:
+					'Add torrents in the paused state. Possible values are "true", "false" (default).',
 			},
 			{
 				displayName: 'Create Root Folder',
@@ -248,7 +252,8 @@ export class QBittorrent implements INodeType {
 						resource: ['torrents'],
 					},
 				},
-				description: 'Create the root folder. Possible values are "true", "false", unset (default).',
+				description:
+					'Create the root folder. Possible values are "true", "false", unset (default).',
 			},
 			{
 				displayName: 'Rename Torrent',
@@ -351,8 +356,9 @@ export class QBittorrent implements INodeType {
 						resource: ['torrents'],
 					},
 				},
-				description: 'Prioritize download first last piece. Possible values are "true", "false" (default).',
-			}
-		]
-	}
+				description:
+					'Prioritize download first last piece. Possible values are "true", "false" (default).',
+			},
+		],
+	};
 }
