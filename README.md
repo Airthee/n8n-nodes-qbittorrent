@@ -34,7 +34,9 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 ## Credentials
 
 Before using a node, you have to add a credential.  
-This credential should be your server address and the username / password that have access to the web UI.
+This credential should be your server address and the username / password that have access to the web UI.  
+
+Make sure you don't include a slash at the end of the URL, otherwise you may encounter 404 errors when performing various operations.
 
 ## Compatibility
 
