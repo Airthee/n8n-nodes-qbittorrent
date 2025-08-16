@@ -112,6 +112,16 @@ export class QBittorrent implements INodeType {
 									firstLastPiecePrio: '={{ $parameter["firstLastPiecePrio"] }}',
 								},
 							},
+							output: {
+								postReceive: [
+									{
+										type: 'set',
+										properties: {
+											value: '={{ { response: $response.body } }}',
+										},
+									},
+								],
+							},
 						},
 					},
 				],
@@ -140,6 +150,16 @@ export class QBittorrent implements INodeType {
 								method: 'GET',
 								url: '/app/version',
 								skipSslCertificateValidation: true,
+							},
+							output: {
+								postReceive: [
+									{
+										type: 'set',
+										properties: {
+											value: '={{ { version: $response.body } }}',
+										},
+									},
+								],
 							},
 						},
 					},
