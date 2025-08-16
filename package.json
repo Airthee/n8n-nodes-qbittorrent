@@ -1,51 +1,51 @@
 {
-  "name": "n8n-nodes-qbittorrent",
-  "version": "0.3.1",
-  "description": "qBittorrent node for n8n",
-  "keywords": [
-    "n8n-community-node-package"
-  ],
-  "license": "MIT",
-  "homepage": "https://github.com/Airthee/n8n-nodes-qbittorrent",
-  "author": {
-    "name": "Airthee",
-    "email": "me@airthee.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Airthee/n8n-nodes-qbittorrent.git"
-  },
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc && gulp build:icons",
-    "dev": "tsc --watch",
-    "format": "prettier nodes --write",
-    "lint": "eslint nodes package.json",
-    "lintfix": "eslint nodes package.json --fix",
-    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes package.json",
-    "release": "release-it"
-  },
-  "files": [
-    "dist"
-  ],
-  "n8n": {
-    "n8nNodesApiVersion": 1,
-    "credentials": [
-      "dist/nodes/QBittorrent/QBittorrent.credentials.js"
-    ],
-    "nodes": [
-      "dist/nodes/QBittorrent/QBittorrent.node.js"
-    ]
-  },
-  "devDependencies": {
-    "@types/express": "^4.17.6",
-    "@typescript-eslint/parser": "~8.38",
-    "eslint-plugin-n8n-nodes-base": "^1.11.0",
-    "gulp": "^5.0.1",
-    "n8n-core": "*",
-    "n8n-workflow": "*",
-    "prettier": "^3.6.2",
-    "release-it": "^19.0.4",
-    "typescript": "~4.8.4"
-  }
+	"name": "n8n-nodes-qbittorrent",
+	"version": "0.3.1",
+	"description": "qBittorrent node for n8n",
+	"keywords": [
+		"n8n-community-node-package"
+	],
+	"license": "MIT",
+	"homepage": "https://github.com/Airthee/n8n-nodes-qbittorrent",
+	"author": {
+		"name": "Airthee",
+		"email": "me@airthee.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Airthee/n8n-nodes-qbittorrent.git"
+	},
+	"main": "index.js",
+	"scripts": {
+		"build": "rimraf dist && tsc && gulp build:icons",
+		"dev": "tsc --watch",
+		"format": "prettier nodes --write",
+		"lint": "eslint nodes package.json",
+		"lintfix": "eslint nodes package.json --fix",
+		"prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes package.json",
+		"release": "release-it"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"credentials": [
+			"dist/credentials/QBittorrentApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/QBittorrent/QBittorrent.node.js"
+		]
+	},
+	"devDependencies": {
+		"@types/express": "^4.17.6",
+		"@typescript-eslint/parser": "~8.38",
+		"eslint-plugin-n8n-nodes-base": "^1.11.0",
+		"gulp": "^5.0.1",
+		"n8n-core": "*",
+		"n8n-workflow": "*",
+		"prettier": "^3.6.2",
+		"release-it": "^19.0.4",
+		"typescript": "~4.8.4"
+	}
 }

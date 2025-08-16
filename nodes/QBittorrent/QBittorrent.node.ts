@@ -1,4 +1,4 @@
-import { INodeType, INodeTypeDescription } from 'n8n-workflow';
+import { INodeType, INodeTypeDescription, NodeConnectionType } from 'n8n-workflow';
 
 // Documentation
 // https://docs.n8n.io/integrations/creating-nodes/overview/
@@ -21,8 +21,10 @@ export class QBittorrent implements INodeType {
 		defaults: {
 			name: 'qBittorrent',
 		},
-		inputs: ['main'],
-		outputs: ['main'],
+		// eslint-disable-next-line n8n-nodes-base/node-class-description-inputs-wrong-regular-node
+		inputs: [NodeConnectionType.Main],
+		// eslint-disable-next-line n8n-nodes-base/node-class-description-outputs-wrong
+		outputs: [NodeConnectionType.Main],
 		requestDefaults: {
 			baseURL: '={{$credentials["url"] + "/api/v2"}}',
 		},

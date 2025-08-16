@@ -1,9 +1,17 @@
-import { IAuthenticateGeneric, ICredentialDataDecryptedObject, ICredentialTestRequest, ICredentialType, IHttpRequestHelper, IHttpRequestOptions, INodeProperties } from "n8n-workflow";
+import {
+	IAuthenticateGeneric,
+	ICredentialDataDecryptedObject,
+	ICredentialTestRequest,
+	ICredentialType,
+	IHttpRequestHelper,
+	IHttpRequestOptions,
+	INodeProperties,
+} from 'n8n-workflow';
 
-export class QBittorrent implements ICredentialType {
-	name = "qBittorrentApi";
+export class QBittorrentApi implements ICredentialType {
+	name = 'qBittorrentApi';
 
-	displayName = "qBittorrent API";
+	displayName = 'qBittorrent API';
 
 	properties: INodeProperties[] = [
 		{
@@ -11,6 +19,13 @@ export class QBittorrent implements ICredentialType {
 			name: 'url',
 			type: 'string',
 			default: '',
+			extractValue: {
+				type: 'regex',
+				regex: /https?:\/\/.+[^/]/,
+			},
+			placeholder: 'http://localhost:8080',
+			hint: 'The URL of the qBittorrent WebUI. Do not include slash at the end.',
+			validateType: 'url',
 		},
 		{
 			displayName: 'Username',
@@ -52,21 +67,22 @@ export class QBittorrent implements ICredentialType {
 		const requestConfig: IHttpRequestOptions = {
 			method: 'POST',
 			headers: {
-				Referer: credentials.url
+				Referer: credentials.url,
 			},
-			url: `${url.endsWith('/') ? url.slice(0, -1) : url}/api/v2/auth/login`,
+			url: `${url}/api/v2/auth/login`,
 			body: new URLSearchParams({
-				'username': credentials.username as string,
-				'password': credentials.password as string,
+				username: credentials.username as string,
+				password: credentials.password as string,
 			}),
 			returnFullResponse: true,
-			skipSslCertificateValidation: true
+			skipSslCertificateValidation: true,
 		};
 
 		const resp = await this.helpers.httpRequest(requestConfig).catch((e) => {
 			console.error(e.response.data);
 			throw e;
 		});
+
 		return { cookie: resp.headers['set-cookie'] };
 	}
 
