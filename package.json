@@ -38,7 +38,7 @@
 		]
 	},
 	"devDependencies": {
-		"@types/express": "^4.17.6",
+		"@types/express": "^5.0.3",
 		"@typescript-eslint/parser": "~8.38",
 		"eslint-plugin-n8n-nodes-base": "^1.11.0",
 		"gulp": "^5.0.1",
