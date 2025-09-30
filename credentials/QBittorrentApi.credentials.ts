@@ -4,12 +4,21 @@ import {
 	ICredentialTestRequest,
 	ICredentialType,
 	IHttpRequestHelper,
-	IHttpRequestOptions,
 	INodeProperties,
 } from 'n8n-workflow';
+import { instanciateQBittorrentClient } from '../helpers/qbittorrent-client-instanciate';
+
+export const QBittorrentApiName = 'qBittorrentApi';
+
+export type QBittorrentApiCredentials = {
+	url: string;
+	username: string;
+	password: string;
+	cookie: string;
+};
 
 export class QBittorrentApi implements ICredentialType {
-	name = 'qBittorrentApi';
+	name = QBittorrentApiName;
 
 	displayName = 'qBittorrent API';
 
@@ -63,27 +72,13 @@ export class QBittorrentApi implements ICredentialType {
 	};
 
 	async preAuthentication(this: IHttpRequestHelper, credentials: ICredentialDataDecryptedObject) {
-		const url = credentials.url as string;
-		const requestConfig: IHttpRequestOptions = {
-			method: 'POST',
-			headers: {
-				Referer: credentials.url,
-			},
-			url: `${url}/api/v2/auth/login`,
-			body: new URLSearchParams({
-				username: credentials.username as string,
-				password: credentials.password as string,
-			}),
-			returnFullResponse: true,
-			skipSslCertificateValidation: true,
-		};
+		const client = instanciateQBittorrentClient(
+			{ request: this.helpers.httpRequest },
+			credentials as QBittorrentApiCredentials,
+		);
 
-		const resp = await this.helpers.httpRequest(requestConfig).catch((e) => {
-			console.error(e.response.data);
-			throw e;
-		});
-
-		return { cookie: resp.headers['set-cookie'] };
+		const cookie = await client.fetchCookie();
+		return { cookie };
 	}
 
 	test: ICredentialTestRequest = {
@@ -91,6 +86,9 @@ export class QBittorrentApi implements ICredentialType {
 			baseURL: '={{$credentials?.url}}',
 			url: '/api/v2/app/version',
 			skipSslCertificateValidation: true,
+			headers: {
+				Cookie: '={{$credentials.cookie}}',
+			},
 		},
 	};
 }

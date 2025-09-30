@@ -1,9 +1,34 @@
-import { INodeType, INodeTypeDescription, NodeConnectionType } from 'n8n-workflow';
+import {
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeType,
+	INodeTypeDescription,
+	NodeConnectionType,
+	NodeExecutionWithMetadata,
+} from 'n8n-workflow';
+import { addTorrent } from './QBittorrent.actions';
+import {
+	QBittorrentApiCredentials,
+	QBittorrentApiName,
+} from '../../credentials/QBittorrentApi.credentials';
+import {
+	QBittorrentClient,
+	QBittorrentClientConstructorOptions,
+} from '../../lib/qbittorrent-client/qbittorrent-client';
+import { sha512 } from '../../lib/qbittorrent-client/utils/sha512';
 
 // Documentation
 // https://docs.n8n.io/integrations/creating-nodes/overview/
+// https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-5.0)
 
 export class QBittorrent implements INodeType {
+	static client:
+		| {
+				identifier: string;
+				instance: QBittorrentClient;
+		  }
+		| undefined;
+
 	description: INodeTypeDescription = {
 		displayName: 'qBittorrent',
 		name: 'qBittorrent',
@@ -14,7 +39,7 @@ export class QBittorrent implements INodeType {
 		description: 'Communicate with your qBittorrent instance web API',
 		credentials: [
 			{
-				name: 'qBittorrentApi',
+				name: QBittorrentApiName,
 				required: true,
 			},
 		],
@@ -85,44 +110,6 @@ export class QBittorrent implements INodeType {
 						name: 'Add Torrent',
 						value: 'addTorrent',
 						action: 'Add a torrent to the list',
-						routing: {
-							request: {
-								method: 'POST',
-								url: '/torrents/add',
-								skipSslCertificateValidation: true,
-								headers: {
-									'content-type': 'multipart/form-data',
-								},
-								body: {
-									urls: '={{ $parameter["urls"] }}',
-									savepath: '={{ $parameter["savepath"] }}',
-									cookie: '={{ $parameter["cookie"] }}',
-									category: '={{ $parameter["category"] }}',
-									tags: '={{ $parameter["tags"] }}',
-									skip_checking: '={{ $parameter["skip_checking"] }}',
-									paused: '={{ $parameter["paused"] }}',
-									root_folder: '={{ $parameter["root_folder"] }}',
-									rename: '={{ $parameter["rename"] }}',
-									upLimit: '={{ $parameter["upLimit"].toString() }}',
-									dlLimit: '={{ $parameter["dlLimit"].toString() }}',
-									ratioLimit: '={{ $parameter["ratioLimit"].toString() }}',
-									seedingTimeLimit: '={{ $parameter["seedingTimeLimit"].toString() }}',
-									autoTMM: '={{ $parameter["autoTMM"] ? "true" : "false" }}',
-									sequentialDownload: '={{ $parameter["sequentialDownload"] }}',
-									firstLastPiecePrio: '={{ $parameter["firstLastPiecePrio"] }}',
-								},
-							},
-							output: {
-								postReceive: [
-									{
-										type: 'set',
-										properties: {
-											value: '={{ { response: $response.body } }}',
-										},
-									},
-								],
-							},
-						},
 					},
 				],
 				default: 'addTorrent',
@@ -185,202 +172,168 @@ export class QBittorrent implements INodeType {
 				description: 'URLs separated with newlines',
 			},
 			{
-				displayName: 'Save Path',
-				name: 'savepath',
-				type: 'string',
-				default: '',
+				displayName: 'Additional Parameters',
+				name: 'additionalParameters',
+				type: 'collection',
+				placeholder: 'Add an option',
 				displayOptions: {
 					show: {
 						operation: ['addTorrent'],
 						resource: ['torrents'],
 					},
 				},
-				description: 'Download folder',
-			},
-			{
-				displayName: 'Cookie',
-				name: 'cookie',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+				default: {},
+				options: [
+					{
+						displayName: 'Automatic Torrent Management',
+						name: 'autoTMM',
+						type: 'boolean',
+						default: false,
+						description: 'Whether Automatic Torrent Management should be used',
 					},
-				},
-				description: 'Cookie sent to download the .torrent file',
-			},
-			{
-				displayName: 'Category',
-				name: 'category',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+					{
+						displayName: 'Category',
+						name: 'category',
+						type: 'string',
+						default: '',
+						description: 'Category for the torrent',
 					},
-				},
-				description: 'Category for the torrent',
-			},
-			{
-				displayName: 'Tags',
-				name: 'tags',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+					{
+						displayName: 'Cookie',
+						name: 'cookie',
+						type: 'string',
+						default: '',
+						description: 'Cookie sent to download the .torrent file',
 					},
-				},
-				description: 'Tags for the torrent, split by ","',
-			},
-			{
-				displayName: 'Skip Hash Checking',
-				name: 'skip_checking',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+					{
+						displayName: 'Create Root Folder',
+						name: 'root_folder',
+						type: 'string',
+						default: '',
+						description:
+							'Create the root folder. Possible values are "true", "false", unset (default).',
 					},
-				},
-				description: 'Skip hash checking. Possible values are "true", "false" (default).',
-			},
-			{
-				displayName: 'Paused',
-				name: 'paused',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+					{
+						displayName: 'Download Limit',
+						name: 'dlLimit',
+						type: 'number',
+						default: '',
+						description: 'Set torrent download speed limit. Unit in bytes/second.',
 					},
-				},
-				description:
-					'Add torrents in the paused state. Possible values are "true", "false" (default).',
-			},
-			{
-				displayName: 'Create Root Folder',
-				name: 'root_folder',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+					{
+						displayName: 'First Last Piece Priority',
+						name: 'firstLastPiecePrio',
+						type: 'boolean',
+						default: false,
+						description: 'Whether first last piece should be prioritized',
 					},
-				},
-				description:
-					'Create the root folder. Possible values are "true", "false", unset (default).',
-			},
-			{
-				displayName: 'Rename Torrent',
-				name: 'rename',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+					{
+						displayName: 'Paused',
+						name: 'paused',
+						type: 'boolean',
+						default: false,
+						description: 'Whether torrents are added in the paused state',
 					},
-				},
-			},
-			{
-				displayName: 'Upload Limit',
-				name: 'upLimit',
-				type: 'number',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+					{
+						displayName: 'Ratio Limit',
+						name: 'ratioLimit',
+						type: 'number',
+						default: '',
+						description: 'Set torrent share ratio limit',
 					},
-				},
-				description: 'Set torrent upload speed limit. Unit in bytes/second.',
-			},
-			{
-				displayName: 'Download Limit',
-				name: 'dlLimit',
-				type: 'number',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+					{
+						displayName: 'Rename Torrent',
+						name: 'rename',
+						type: 'string',
+						default: '',
 					},
-				},
-				description: 'Set torrent download speed limit. Unit in bytes/second.',
-			},
-			{
-				displayName: 'Ratio Limit',
-				name: 'ratioLimit',
-				type: 'number',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+					{
+						displayName: 'Save Path',
+						name: 'savepath',
+						type: 'string',
+						default: '',
+						description: 'Download folder',
 					},
-				},
-				description: 'Set torrent share ratio limit',
-			},
-			{
-				displayName: 'Seeding Time Limit',
-				name: 'seedingTimeLimit',
-				type: 'number',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+					{
+						displayName: 'Seeding Time Limit',
+						name: 'seedingTimeLimit',
+						type: 'number',
+						default: '',
+						description: 'Set torrent seeding time limit. Unit in minutes.',
 					},
-				},
-				description: 'Set torrent seeding time limit. Unit in minutes.',
-			},
-			{
-				displayName: 'Automatic Torrent Management',
-				name: 'autoTMM',
-				type: 'boolean',
-				default: false,
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+					{
+						displayName: 'Sequential Download',
+						name: 'sequentialDownload',
+						type: 'boolean',
+						default: false,
+						description: 'Whether sequential download is should be enabled',
 					},
-				},
-				description: 'Whether Automatic Torrent Management should be used',
-			},
-			{
-				displayName: 'Sequential Download',
-				name: 'sequentialDownload',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+
+					{
+						displayName: 'Skip Hash Checking',
+						name: 'skip_checking',
+						type: 'boolean',
+						default: false,
+						description: 'Whether hash checking is skipped',
 					},
-				},
-				description: 'Enable sequential download. Possible values are "true", "false" (default).',
-			},
-			{
-				displayName: 'First Last Piece Priority',
-				name: 'firstLastPiecePrio',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['addTorrent'],
-						resource: ['torrents'],
+					{
+						displayName: 'Tags',
+						name: 'tags',
+						type: 'string',
+						default: '',
+						description: 'Tags for the torrent, split by ","',
 					},
-				},
-				description:
-					'Prioritize download first last piece. Possible values are "true", "false" (default).',
+					{
+						displayName: 'Upload Limit',
+						name: 'upLimit',
+						type: 'number',
+						default: '',
+						description: 'Set torrent upload speed limit. Unit in bytes/second.',
+					},
+				],
 			},
 		],
 	};
+
+	public async execute(
+		this: IExecuteFunctions,
+	): Promise<INodeExecutionData[][] | NodeExecutionWithMetadata[][] | null> {
+		const items = this.getInputData();
+		const returnData: INodeExecutionData[] = [];
+		for (let i = 0; i < items.length; i++) {
+			const credentials = (await this.getCredentials(
+				QBittorrentApiName,
+				i,
+			)) as QBittorrentApiCredentials;
+			const client = await QBittorrent.getClientInstance({
+				baseURL: credentials.url as string,
+				requestHelper: { request: this.helpers.httpRequest },
+				auth: {
+					username: credentials.username,
+					password: credentials.password,
+				},
+			});
+
+			const action = this.getNodeParameter('operation', i);
+			if (action === 'addTorrent') {
+				const response = await addTorrent(this, i, client);
+				returnData.push({ json: response });
+			}
+		}
+
+		return this.prepareOutputData(returnData);
+	}
+
+	public static async getClientInstance(options: QBittorrentClientConstructorOptions) {
+		const clearIdentifier = `${options.baseURL}-${options.auth?.username}-${options.auth?.password}`;
+		const hash = await sha512(clearIdentifier);
+
+		if (QBittorrent.client?.identifier !== hash) {
+			QBittorrent.client = {
+				identifier: hash,
+				instance: new QBittorrentClient(options),
+			};
+		}
+		return QBittorrent.client.instance;
+	}
 }

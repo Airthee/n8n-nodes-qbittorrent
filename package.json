@@ -23,7 +23,8 @@
 		"lint": "eslint nodes package.json",
 		"lintfix": "eslint nodes package.json --fix",
 		"prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes package.json",
-		"release": "release-it"
+		"release": "release-it",
+		"test": "vitest"
 	},
 	"files": [
 		"dist"
@@ -45,6 +46,7 @@
 		"n8n-workflow": "*",
 		"prettier": "^3.6.2",
 		"release-it": "^19.0.4",
-		"typescript": "~5.9.2"
+		"typescript": "~5.9.2",
+		"vitest": "^3.2.4"
 	}
 }
