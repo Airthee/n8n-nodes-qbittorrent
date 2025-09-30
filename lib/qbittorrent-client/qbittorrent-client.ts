@@ -151,4 +151,15 @@ export class QBittorrentClient {
 
 		return await this.doRequest(requestOptions);
 	}
+
+	public async getTorrentsList() {
+		const requestOptions: RequestOptions = {
+			method: 'GET',
+			baseURL: this.options.baseURL,
+			url: '/api/v2/torrents/info',
+			headers: await this.buildHeaders({}),
+		};
+
+		return await this.doRequest(requestOptions);
+	}
 }

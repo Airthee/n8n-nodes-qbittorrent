@@ -29,7 +29,7 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
   - getTorrentsList: Get torrents list
   - addTorrent: Add a torrent to the list
 - App
-  - getApiVersion: Get API version
+  - getAppVersion: Get API version
 
 ## Credentials
 
@@ -83,7 +83,7 @@ TODO: when the node development is completed, we will be on 1.x.y version.
 ## Supported operations
 
 - application
-  - getApiVersion
+  - getAppVersion
 - torrents
   - getTorrentsList
   - addTorrent

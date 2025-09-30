@@ -4,10 +4,6 @@ import {
 	QBittorrentClient,
 } from '../../lib/qbittorrent-client/qbittorrent-client';
 
-export class QBittorrentActions {
-	static instance: QBittorrentActions;
-}
-
 export async function addTorrent(
 	executeContext: IExecuteFunctions,
 	itemIndex: number,
@@ -22,4 +18,20 @@ export async function addTorrent(
 	};
 
 	return client.addTorrent(options);
+}
+
+export async function getAppVersion(
+	executeContext: IExecuteFunctions,
+	itemIndex: number,
+	client: QBittorrentClient,
+) {
+	return client.getAppVersion();
+}
+
+export async function getTorrentsList(
+	executeContext: IExecuteFunctions,
+	itemIndex: number,
+	client: QBittorrentClient,
+) {
+	return client.getTorrentsList();
 }
