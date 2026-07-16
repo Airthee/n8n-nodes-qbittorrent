@@ -5,8 +5,9 @@ import {
 	INodeTypeDescription,
 	NodeConnectionType,
 	NodeExecutionWithMetadata,
+	NodeOperationError,
 } from 'n8n-workflow';
-import { addTorrent, getAppVersion, getTorrentsList } from './QBittorrent.actions';
+import * as actions from './QBittorrent.actions';
 import {
 	QBittorrentApiCredentials,
 	QBittorrentApiName,
@@ -106,16 +107,14 @@ export class QBittorrent implements INodeType {
 				},
 			});
 
-			const action = this.getNodeParameter('operation', i);
-			if (action === 'addTorrent') {
-				returnData.push({ json: await addTorrent(this, i, client) });
+			const operation = this.getNodeParameter('operation', i) as keyof typeof actions;
+			const action = actions[operation];
+			if (typeof action !== 'function') {
+				throw new NodeOperationError(this.getNode(), `Unknown operation: ${operation}`, {
+					itemIndex: i,
+				});
 			}
-			if (action === 'getAppVersion') {
-				returnData.push({ json: await getAppVersion(this, i, client) });
-			}
-			if (action === 'getTorrentsList') {
-				returnData.push({ json: await getTorrentsList(this, i, client) });
-			}
+			returnData.push({ json: await action(this, i, client) });
 		}
 
 		return this.prepareOutputData(returnData);

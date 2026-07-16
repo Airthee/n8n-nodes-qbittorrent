@@ -139,4 +139,133 @@ export const fields = [
 			},
 		],
 	},
+
+	// ----------------------------------
+	//   Fields for the torrent operations
+	// ----------------------------------
+	{
+		displayName: 'Torrent Hashes',
+		name: 'hashes',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'hash1|hash2 or all',
+		description: 'Torrent hashes separated by a pipe "|", or the keyword "all"',
+		displayOptions: {
+			show: {
+				resource: ['torrents'],
+				operation: [
+					'pauseTorrents',
+					'resumeTorrents',
+					'deleteTorrents',
+					'recheckTorrents',
+					'reannounceTorrents',
+					'setTorrentCategory',
+					'addTorrentTags',
+					'removeTorrentTags',
+					'setTorrentLocation',
+				],
+			},
+		},
+	},
+	{
+		displayName: 'Torrent Hash',
+		name: 'hash',
+		type: 'string',
+		default: '',
+		required: true,
+		description: 'The hash of the torrent',
+		displayOptions: {
+			show: {
+				resource: ['torrents'],
+				operation: [
+					'getTorrentProperties',
+					'getTorrentFiles',
+					'getTorrentTrackers',
+					'renameTorrent',
+				],
+			},
+		},
+	},
+	{
+		displayName: 'Delete Files',
+		name: 'deleteFiles',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to also delete the downloaded files from disk',
+		displayOptions: {
+			show: {
+				resource: ['torrents'],
+				operation: ['deleteTorrents'],
+			},
+		},
+	},
+	{
+		displayName: 'Category',
+		name: 'category',
+		type: 'string',
+		default: '',
+		description: 'Category name (leave empty on Set Category to remove the category)',
+		displayOptions: {
+			show: {
+				resource: ['torrents'],
+				operation: ['setTorrentCategory', 'createCategory'],
+			},
+		},
+	},
+	{
+		displayName: 'Save Path',
+		name: 'savePath',
+		type: 'string',
+		default: '',
+		description: 'Save path for the category',
+		displayOptions: {
+			show: {
+				resource: ['torrents'],
+				operation: ['createCategory'],
+			},
+		},
+	},
+	{
+		displayName: 'Tags',
+		name: 'tags',
+		type: 'string',
+		default: '',
+		required: true,
+		description: 'Tags separated by a comma ","',
+		displayOptions: {
+			show: {
+				resource: ['torrents'],
+				operation: ['addTorrentTags', 'removeTorrentTags', 'createTags'],
+			},
+		},
+	},
+	{
+		displayName: 'Location',
+		name: 'location',
+		type: 'string',
+		default: '',
+		required: true,
+		description: 'The new location for the torrents',
+		displayOptions: {
+			show: {
+				resource: ['torrents'],
+				operation: ['setTorrentLocation'],
+			},
+		},
+	},
+	{
+		displayName: 'New Name',
+		name: 'name',
+		type: 'string',
+		default: '',
+		required: true,
+		description: 'The new name for the torrent',
+		displayOptions: {
+			show: {
+				resource: ['torrents'],
+				operation: ['renameTorrent'],
+			},
+		},
+	},
 ] satisfies INodeProperties[];

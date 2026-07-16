@@ -162,4 +162,161 @@ export class QBittorrentClient {
 
 		return await this.doRequest(requestOptions);
 	}
+
+	// ----------------------------------------------------------------
+	//  Generic helpers
+	// ----------------------------------------------------------------
+
+	private buildForm(params: Record<string, string | undefined>): URLSearchParams {
+		const form = new URLSearchParams();
+		for (const [key, value] of Object.entries(params)) {
+			if (value !== undefined) {
+				form.append(key, value);
+			}
+		}
+		return form;
+	}
+
+	/** GET request, with an optional query string. */
+	private async getJson(url: string, query?: Record<string, string>) {
+		const queryString = query ? `?${new URLSearchParams(query).toString()}` : '';
+		const requestOptions: RequestOptions = {
+			method: 'GET',
+			baseURL: this.options.baseURL,
+			url: `${url}${queryString}`,
+			headers: await this.buildHeaders({}),
+		};
+
+		return await this.doRequest(requestOptions);
+	}
+
+	/** POST request with an application/x-www-form-urlencoded body. */
+	private async postForm(url: string, params: Record<string, string | undefined>) {
+		const requestOptions: RequestOptions = {
+			method: 'POST',
+			baseURL: this.options.baseURL,
+			url,
+			headers: await this.buildHeaders({
+				'content-type': 'application/x-www-form-urlencoded',
+			}),
+			body: this.buildForm(params),
+		};
+
+		return await this.doRequest(requestOptions);
+	}
+
+	// ----------------------------------------------------------------
+	//  Torrent control
+	// ----------------------------------------------------------------
+
+	public async pauseTorrents(hashes: string) {
+		return this.postForm('/api/v2/torrents/pause', { hashes });
+	}
+
+	public async resumeTorrents(hashes: string) {
+		return this.postForm('/api/v2/torrents/resume', { hashes });
+	}
+
+	public async deleteTorrents(hashes: string, deleteFiles: boolean) {
+		return this.postForm('/api/v2/torrents/delete', {
+			hashes,
+			deleteFiles: deleteFiles ? 'true' : 'false',
+		});
+	}
+
+	public async recheckTorrents(hashes: string) {
+		return this.postForm('/api/v2/torrents/recheck', { hashes });
+	}
+
+	public async reannounceTorrents(hashes: string) {
+		return this.postForm('/api/v2/torrents/reannounce', { hashes });
+	}
+
+	// ----------------------------------------------------------------
+	//  Torrent organization
+	// ----------------------------------------------------------------
+
+	public async setTorrentCategory(hashes: string, category: string) {
+		return this.postForm('/api/v2/torrents/setCategory', { hashes, category });
+	}
+
+	public async addTorrentTags(hashes: string, tags: string) {
+		return this.postForm('/api/v2/torrents/addTags', { hashes, tags });
+	}
+
+	public async removeTorrentTags(hashes: string, tags: string) {
+		return this.postForm('/api/v2/torrents/removeTags', { hashes, tags });
+	}
+
+	public async setTorrentLocation(hashes: string, location: string) {
+		return this.postForm('/api/v2/torrents/setLocation', { hashes, location });
+	}
+
+	public async renameTorrent(hash: string, name: string) {
+		return this.postForm('/api/v2/torrents/rename', { hash, name });
+	}
+
+	// ----------------------------------------------------------------
+	//  Torrent details
+	// ----------------------------------------------------------------
+
+	public async getTorrentProperties(hash: string) {
+		return this.getJson('/api/v2/torrents/properties', { hash });
+	}
+
+	public async getTorrentFiles(hash: string) {
+		return this.getJson('/api/v2/torrents/files', { hash });
+	}
+
+	public async getTorrentTrackers(hash: string) {
+		return this.getJson('/api/v2/torrents/trackers', { hash });
+	}
+
+	// ----------------------------------------------------------------
+	//  Categories & tags
+	// ----------------------------------------------------------------
+
+	public async getCategories() {
+		return this.getJson('/api/v2/torrents/categories');
+	}
+
+	public async createCategory(category: string, savePath: string) {
+		return this.postForm('/api/v2/torrents/createCategory', { category, savePath });
+	}
+
+	public async getTags() {
+		return this.getJson('/api/v2/torrents/tags');
+	}
+
+	public async createTags(tags: string) {
+		return this.postForm('/api/v2/torrents/createTags', { tags });
+	}
+
+	// ----------------------------------------------------------------
+	//  Transfer info
+	// ----------------------------------------------------------------
+
+	public async getGlobalTransferInfo() {
+		return this.getJson('/api/v2/transfer/info');
+	}
+
+	public async getSpeedLimitsMode() {
+		return this.getJson('/api/v2/transfer/speedLimitsMode');
+	}
+
+	public async toggleSpeedLimitsMode() {
+		return this.postForm('/api/v2/transfer/toggleSpeedLimitsMode', {});
+	}
+
+	// ----------------------------------------------------------------
+	//  Application
+	// ----------------------------------------------------------------
+
+	public async getBuildInfo() {
+		return this.getJson('/api/v2/app/buildInfo');
+	}
+
+	public async getPreferences() {
+		return this.getJson('/api/v2/app/preferences');
+	}
 }
