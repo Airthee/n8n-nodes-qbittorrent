@@ -3,6 +3,8 @@ import {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
+	NodeApiError,
 	NodeConnectionType,
 	NodeExecutionWithMetadata,
 	NodeOperationError,
@@ -35,7 +37,7 @@ export class QBittorrent implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'qBittorrent',
 		name: 'qBittorrent',
-		icon: 'file:qbittorrent.svg',
+		icon: { light: 'file:qbittorrent.svg', dark: 'file:qbittorrent.svg' },
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
@@ -94,27 +96,38 @@ export class QBittorrent implements INodeType {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
 		for (let i = 0; i < items.length; i++) {
-			const credentials = (await this.getCredentials(
-				QBittorrentApiName,
-				i,
-			)) as QBittorrentApiCredentials;
-			const client = await QBittorrent.getClientInstance({
-				baseURL: credentials.url as string,
-				requestHelper: { request: this.helpers.httpRequest },
-				auth: {
-					username: credentials.username,
-					password: credentials.password,
-				},
-			});
-
-			const operation = this.getNodeParameter('operation', i) as keyof typeof actions;
-			const action = actions[operation];
-			if (typeof action !== 'function') {
-				throw new NodeOperationError(this.getNode(), `Unknown operation: ${operation}`, {
-					itemIndex: i,
+			try {
+				const credentials = (await this.getCredentials(
+					QBittorrentApiName,
+					i,
+				)) as QBittorrentApiCredentials;
+				const client = await QBittorrent.getClientInstance({
+					baseURL: credentials.url as string,
+					requestHelper: { request: this.helpers.httpRequest },
+					auth: {
+						username: credentials.username,
+						password: credentials.password,
+					},
 				});
+
+				const operation = this.getNodeParameter('operation', i) as keyof typeof actions;
+				const action = actions[operation];
+				if (typeof action !== 'function') {
+					throw new NodeOperationError(this.getNode(), `Unknown operation: ${operation}`, {
+						itemIndex: i,
+					});
+				}
+				returnData.push({ json: await action(this, i, client) });
+			} catch (error) {
+				if (this.continueOnFail()) {
+					returnData.push({
+						json: { error: (error as Error).message },
+						pairedItem: { item: i },
+					});
+					continue;
+				}
+				throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex: i });
 			}
-			returnData.push({ json: await action(this, i, client) });
 		}
 
 		return this.prepareOutputData(returnData);
