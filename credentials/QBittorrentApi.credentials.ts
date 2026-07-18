@@ -22,6 +22,8 @@ export class QBittorrentApi implements ICredentialType {
 
 	displayName = 'qBittorrent API';
 
+	icon = 'file:qbittorrentApi.svg' as const;
+
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Url',
