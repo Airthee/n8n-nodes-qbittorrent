@@ -97,13 +97,56 @@ describe('qbittorrent-client', () => {
 	});
 
 	describe('torrent control', () => {
-		it('should POST /torrents/pause with the hashes', async () => {
+		it('should POST /torrents/stop to pause on qBittorrent 5.x', async () => {
+			requestHelper.request.mockResolvedValueOnce({ body: 'v5.0.4', headers: {} });
+			await getClient().pauseTorrents('hash1|hash2');
+
+			expect(requestHelper.request).toHaveBeenCalledWith({
+				method: 'POST',
+				baseURL: BASE_URL,
+				url: '/api/v2/torrents/stop',
+				headers: { 'content-type': 'application/x-www-form-urlencoded' },
+				body: new URLSearchParams({ hashes: 'hash1|hash2' }),
+				returnFullResponse: true,
+			});
+		});
+
+		it('should POST /torrents/start to resume on qBittorrent 5.x', async () => {
+			requestHelper.request.mockResolvedValueOnce({ body: 'v5.0.4', headers: {} });
+			await getClient().resumeTorrents('hash1|hash2');
+
+			expect(requestHelper.request).toHaveBeenCalledWith({
+				method: 'POST',
+				baseURL: BASE_URL,
+				url: '/api/v2/torrents/start',
+				headers: { 'content-type': 'application/x-www-form-urlencoded' },
+				body: new URLSearchParams({ hashes: 'hash1|hash2' }),
+				returnFullResponse: true,
+			});
+		});
+
+		it('should fall back to /torrents/pause on qBittorrent 4.x', async () => {
+			requestHelper.request.mockResolvedValueOnce({ body: 'v4.6.7', headers: {} });
 			await getClient().pauseTorrents('hash1|hash2');
 
 			expect(requestHelper.request).toHaveBeenCalledWith({
 				method: 'POST',
 				baseURL: BASE_URL,
 				url: '/api/v2/torrents/pause',
+				headers: { 'content-type': 'application/x-www-form-urlencoded' },
+				body: new URLSearchParams({ hashes: 'hash1|hash2' }),
+				returnFullResponse: true,
+			});
+		});
+
+		it('should fall back to /torrents/resume on qBittorrent 4.x', async () => {
+			requestHelper.request.mockResolvedValueOnce({ body: 'v4.6.7', headers: {} });
+			await getClient().resumeTorrents('hash1|hash2');
+
+			expect(requestHelper.request).toHaveBeenCalledWith({
+				method: 'POST',
+				baseURL: BASE_URL,
+				url: '/api/v2/torrents/resume',
 				headers: { 'content-type': 'application/x-www-form-urlencoded' },
 				body: new URLSearchParams({ hashes: 'hash1|hash2' }),
 				returnFullResponse: true,
