@@ -177,4 +177,31 @@ export const operations = [
 		],
 		default: 'getAppVersion',
 	},
+	// ----------------------------------
+	//         operation:logs
+	// ----------------------------------
+	{
+		displayName: 'Operation',
+		name: 'operation',
+		type: 'options',
+		noDataExpression: true,
+		displayOptions: {
+			show: {
+				resource: ['logs'],
+			},
+		},
+		options: [
+			{
+				name: 'Get Main Log',
+				value: 'getMainLog',
+				action: 'Get the main log',
+			},
+			{
+				name: 'Get Peer Log',
+				value: 'getPeerLog',
+				action: 'Get the peer log',
+			},
+		],
+		default: 'getMainLog',
+	},
 ] satisfies INodeProperties[];
