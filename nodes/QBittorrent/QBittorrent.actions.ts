@@ -40,22 +40,22 @@ export async function getTorrentsList(
 //  Torrent control
 // ----------------------------------------------------------------
 
-export async function pauseTorrents(
+export async function stopTorrents(
 	executeContext: IExecuteFunctions,
 	itemIndex: number,
 	client: QBittorrentClient,
 ) {
 	const hashes = executeContext.getNodeParameter('hashes', itemIndex) as string;
-	return client.pauseTorrents(hashes);
+	return client.stopTorrents(hashes);
 }
 
-export async function resumeTorrents(
+export async function startTorrents(
 	executeContext: IExecuteFunctions,
 	itemIndex: number,
 	client: QBittorrentClient,
 ) {
 	const hashes = executeContext.getNodeParameter('hashes', itemIndex) as string;
-	return client.resumeTorrents(hashes);
+	return client.startTorrents(hashes);
 }
 
 export async function deleteTorrents(
