@@ -40,7 +40,14 @@ Make sure you don't include a slash at the end of the URL, otherwise you may enc
 
 ## Compatibility
 
-TODO: _State the minimum n8n version, as well as which versions you test against. You can also include any known version incompatibility issues._
+This node targets the **qBittorrent WebUI API v2**, and the **primary target is qBittorrent 5.0+**.
+
+qBittorrent 5.0 renamed several torrent-control routes (for example `torrents/pause`/`torrents/resume` became `torrents/stop`/`torrents/start`). To stay compatible across versions, the node auto-detects the qBittorrent major version (via `GET /api/v2/app/version`) and routes accordingly: it uses `stop`/`start` on qBittorrent 5.x, and falls back to `pause`/`resume` on qBittorrent 4.x.
+
+- **qBittorrent 5.0+** is the primary, supported target.
+- **qBittorrent 4.x** is supported for now through the version auto-detection fallback, but **backward compatibility is not guaranteed going forward** and may be dropped in a future release.
+
+To avoid breakage with future releases of this node, **keep your qBittorrent instance up to date** (5.0+ recommended).
 
 ## Usage (for developpers)
 
