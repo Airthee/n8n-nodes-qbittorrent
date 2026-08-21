@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-base.qBittorrent",
+	"node": "n8n-nodes-qbittorrent.qBittorrent",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": [
@@ -10,7 +10,7 @@
 	"resources": {
 		"primaryDocumentation": [
 			{
-				"url": ""
+				"url": "https://github.com/Airthee/n8n-nodes-qbittorrent#readme"
 			}
 		]
 	}
