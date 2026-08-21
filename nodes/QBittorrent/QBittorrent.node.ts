@@ -74,7 +74,7 @@ export class QBittorrent implements INodeType {
 						value: 'logs',
 					},
 					{
-						name: 'Tranfer',
+						name: 'Transfer',
 						value: 'transfers',
 					},
 					{
