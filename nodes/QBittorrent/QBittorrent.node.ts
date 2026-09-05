@@ -5,7 +5,7 @@ import {
 	INodeTypeDescription,
 	JsonObject,
 	NodeApiError,
-	NodeConnectionType,
+	NodeConnectionTypes,
 	NodeExecutionWithMetadata,
 	NodeOperationError,
 } from 'n8n-workflow';
@@ -52,9 +52,9 @@ export class QBittorrent implements INodeType {
 			name: 'qBittorrent',
 		},
 		// eslint-disable-next-line n8n-nodes-base/node-class-description-inputs-wrong-regular-node
-		inputs: [NodeConnectionType.Main],
+		inputs: [NodeConnectionTypes.Main],
 		// eslint-disable-next-line n8n-nodes-base/node-class-description-outputs-wrong
-		outputs: [NodeConnectionType.Main],
+		outputs: [NodeConnectionTypes.Main],
 		requestDefaults: {
 			baseURL: '={{$credentials["url"] + "/api/v2"}}',
 		},
