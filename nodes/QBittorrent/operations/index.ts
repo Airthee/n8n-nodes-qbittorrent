@@ -71,11 +71,6 @@ export const operations = [
 				action: 'Get the trackers of a torrent',
 			},
 			{
-				name: 'Pause',
-				value: 'pauseTorrents',
-				action: 'Pause torrents',
-			},
-			{
 				name: 'Reannounce',
 				value: 'reannounceTorrents',
 				action: 'Reannounce torrents to their trackers',
@@ -96,11 +91,6 @@ export const operations = [
 				action: 'Rename a torrent',
 			},
 			{
-				name: 'Resume',
-				value: 'resumeTorrents',
-				action: 'Resume torrents',
-			},
-			{
 				name: 'Set Category',
 				value: 'setTorrentCategory',
 				action: 'Set the category of torrents',
@@ -109,6 +99,16 @@ export const operations = [
 				name: 'Set Location',
 				value: 'setTorrentLocation',
 				action: 'Set the location of torrents',
+			},
+			{
+				name: 'Start',
+				value: 'startTorrents',
+				action: 'Start torrents',
+			},
+			{
+				name: 'Stop',
+				value: 'stopTorrents',
+				action: 'Stop torrents',
 			},
 		],
 		default: 'getTorrentsList',

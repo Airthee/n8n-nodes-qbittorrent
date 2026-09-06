@@ -29,8 +29,8 @@ In short, from your n8n instance: **Settings → Community nodes → Install**, 
 | ---------------------- | ------------------------------------- |
 | `getTorrentsList`      | Get torrents list                     |
 | `addTorrent`           | Add a torrent to the list             |
-| `pauseTorrents`        | Pause torrents                        |
-| `resumeTorrents`       | Resume torrents                       |
+| `stopTorrents`         | Stop torrents                         |
+| `startTorrents`        | Start torrents                        |
 | `deleteTorrents`       | Delete torrents (optionally files)    |
 | `recheckTorrents`      | Recheck torrents                      |
 | `reannounceTorrents`   | Reannounce torrents to their trackers |
@@ -77,14 +77,22 @@ The node logs in once and reuses the session cookie, refreshing it automatically
 
 ## Compatibility
 
-This node targets the **qBittorrent WebUI API v2**, and the **primary target is qBittorrent 5.0+**.
+This node targets the **qBittorrent WebUI API v2**, and requires **qBittorrent 5.0+**.
 
-qBittorrent 5.0 renamed several torrent-control routes (for example `torrents/pause`/`torrents/resume` became `torrents/stop`/`torrents/start`). To stay compatible across versions, the node auto-detects the qBittorrent major version (via `GET /api/v2/app/version`) and routes accordingly: it uses `stop`/`start` on qBittorrent 5.x, and falls back to `pause`/`resume` on qBittorrent 4.x.
+qBittorrent 5.0 renamed several torrent-control routes and parameters. This node uses the 5.x names exclusively, with no version detection and no fallback:
 
-- **qBittorrent 5.0+** is the primary, supported target.
-- **qBittorrent 4.x** is supported for now through the version auto-detection fallback, but **backward compatibility is not guaranteed going forward** and may be dropped in a future release.
+| 4.x                          | 5.x — used by this node |
+| ---------------------------- | ----------------------- |
+| `torrents/pause`             | `torrents/stop`         |
+| `torrents/resume`            | `torrents/start`        |
+| `paused` (torrents/add)      | `stopped`               |
+| `root_folder` (torrents/add) | `contentLayout`         |
 
-To avoid breakage with future releases of this node, **keep your qBittorrent instance up to date** (5.0+ recommended).
+**qBittorrent 4.x is not supported**: the routes above do not exist on 4.x, and the corresponding operations will fail against a 4.x server.
+
+Note that the qBittorrent 5.0 wiki still documents `paused` and `root_folder` for `torrents/add`, but the 5.x source reads only `stopped` and `contentLayout` — the old names are accepted by the request and then silently ignored.
+
+To avoid breakage, **keep your qBittorrent instance up to date** (5.0+ required).
 
 ## Development
 

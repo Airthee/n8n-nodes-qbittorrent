@@ -46,19 +46,32 @@ export const fields = [
 				description: 'Category for the torrent',
 			},
 			{
+				displayName: 'Content Layout',
+				name: 'contentLayout',
+				type: 'options',
+				default: 'Original',
+				description: 'How to lay out the torrent content on disk',
+				options: [
+					{
+						name: 'Create Subfolder',
+						value: 'Subfolder',
+					},
+					{
+						name: 'Do Not Create Subfolder',
+						value: 'NoSubfolder',
+					},
+					{
+						name: 'Original',
+						value: 'Original',
+					},
+				],
+			},
+			{
 				displayName: 'Cookie',
 				name: 'cookie',
 				type: 'string',
 				default: '',
 				description: 'Cookie sent to download the .torrent file',
-			},
-			{
-				displayName: 'Create Root Folder',
-				name: 'root_folder',
-				type: 'string',
-				default: '',
-				description:
-					'Create the root folder. Possible values are "true", "false", unset (default).',
 			},
 			{
 				displayName: 'Download Limit',
@@ -73,13 +86,6 @@ export const fields = [
 				type: 'boolean',
 				default: false,
 				description: 'Whether first last piece should be prioritized',
-			},
-			{
-				displayName: 'Paused',
-				name: 'paused',
-				type: 'boolean',
-				default: false,
-				description: 'Whether torrents are added in the paused state',
 			},
 			{
 				displayName: 'Ratio Limit',
@@ -124,6 +130,13 @@ export const fields = [
 				description: 'Whether hash checking is skipped',
 			},
 			{
+				displayName: 'Stopped',
+				name: 'stopped',
+				type: 'boolean',
+				default: false,
+				description: 'Whether torrents are added in the stopped state',
+			},
+			{
 				displayName: 'Tags',
 				name: 'tags',
 				type: 'string',
@@ -155,8 +168,8 @@ export const fields = [
 			show: {
 				resource: ['torrents'],
 				operation: [
-					'pauseTorrents',
-					'resumeTorrents',
+					'stopTorrents',
+					'startTorrents',
 					'deleteTorrents',
 					'recheckTorrents',
 					'reannounceTorrents',
