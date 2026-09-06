@@ -2,17 +2,34 @@ name: CI
 
 on:
   push:
+    branches:
+      - master
+    paths:
+      - '**.js'
+      - '**.ts'
+      - '**.json'
+      - '.github/workflows/**'
+  pull_request:
     paths:
       - '**.js'
       - '**.ts'
       - '**.json'
       - '.github/workflows/**'
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -24,6 +41,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -35,6 +54,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
