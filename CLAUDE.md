@@ -12,16 +12,18 @@ n8n community node package (`n8n-nodes-qbittorrent`) exposing the qBittorrent We
 npm run build      # rimraf dist && tsc && gulp build:icons  (gulp copies *.svg/*.png into dist)
 npm run dev        # tsc --watch
 npm test           # vitest (watch mode)
-npx vitest run     # single CI-style run
+npm test -- --run  # single run (this is what CI does)
 npx vitest run lib/qbittorrent-client/utils/sha512.test.ts   # one test file
 npx vitest run -t "should login for the first request"        # one test by name
-npm run lint       # eslint nodes package.json (this is what CI runs)
+npm run lint       # eslint nodes package.json
 npm run lintfix
 npm run format     # prettier nodes --write
 npm run release    # release-it (git tag + GitHub release + npm publish)
 ```
 
 There is no vitest config file; vitest uses its defaults and picks up `**/*.test.ts`.
+
+CI (`.github/workflows/ci.yml`) runs `lint`, `build` and `test` as three parallel jobs on Node 22, for pushes to `master` and for pull requests.
 
 Note that `npm run lint` and `npm run format` only cover `nodes/` and `package.json` — `lib/`, `helpers/` and `credentials/` are compiled and tested but not linted by those scripts.
 
