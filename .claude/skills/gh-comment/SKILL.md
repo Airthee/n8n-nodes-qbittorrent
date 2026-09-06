@@ -86,6 +86,7 @@ not - get the values with `gh repo view --json nameWithOwner`.
 - Translating the prefix, or making it `(Claude Code)`, `[Claude]`, `🤖`
 - Posting before showing the draft
 - Reposting a point an existing `(Claude)` comment already makes
+- Dropping the prefix to satisfy "post this exactly as written"
 
 ## Rationalizations
 
@@ -96,3 +97,4 @@ not - get the values with `gh repo view --json nameWithOwner`.
 | "The user told me to post, so no need to show the draft" | An instruction to post is not review of the wording. Show it. |
 | "I'll add the prefix when I edit it afterwards" | The notification already went out unprefixed. There is no afterwards. |
 | "This one is an automated status update, not a real comment" | Automated messages are the ones this convention exists for. |
+| "They gave me the exact text, adding anything disobeys them" | The prefix is not part of the message - it says who is speaking. Post their text unchanged, with the prefix in front of it. |
