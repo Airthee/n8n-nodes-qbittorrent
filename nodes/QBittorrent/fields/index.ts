@@ -268,4 +268,80 @@ export const fields = [
 			},
 		},
 	},
+
+	// ----------------------------------
+	//   Fields for the log operations
+	// ----------------------------------
+	{
+		displayName: 'Options',
+		name: 'options',
+		type: 'collection',
+		placeholder: 'Add option',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['logs'],
+				operation: ['getMainLog'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Critical',
+				name: 'critical',
+				type: 'boolean',
+				default: true,
+				description: 'Whether to include critical messages',
+			},
+			{
+				displayName: 'Info',
+				name: 'info',
+				type: 'boolean',
+				default: true,
+				description: 'Whether to include info messages',
+			},
+			{
+				displayName: 'Last Known ID',
+				name: 'last_known_id',
+				type: 'number',
+				default: -1,
+				description: 'Exclude messages with an ID lower than or equal to this value',
+			},
+			{
+				displayName: 'Normal',
+				name: 'normal',
+				type: 'boolean',
+				default: true,
+				description: 'Whether to include normal messages',
+			},
+			{
+				displayName: 'Warning',
+				name: 'warning',
+				type: 'boolean',
+				default: true,
+				description: 'Whether to include warning messages',
+			},
+		],
+	},
+	{
+		displayName: 'Options',
+		name: 'options',
+		type: 'collection',
+		placeholder: 'Add option',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['logs'],
+				operation: ['getPeerLog'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Last Known ID',
+				name: 'last_known_id',
+				type: 'number',
+				default: -1,
+				description: 'Exclude messages with an ID lower than or equal to this value',
+			},
+		],
+	},
 ] satisfies INodeProperties[];

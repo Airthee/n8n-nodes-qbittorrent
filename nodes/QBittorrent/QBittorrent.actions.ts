@@ -1,6 +1,8 @@
 import { IExecuteFunctions } from 'n8n-workflow';
 import {
 	AddTorrentOptions,
+	GetMainLogOptions,
+	GetPeerLogOptions,
 	QBittorrentClient,
 } from '../../lib/qbittorrent-client/qbittorrent-client';
 
@@ -256,4 +258,26 @@ export async function getPreferences(
 	client: QBittorrentClient,
 ) {
 	return client.getPreferences();
+}
+
+// ----------------------------------------------------------------
+//  Log
+// ----------------------------------------------------------------
+
+export async function getMainLog(
+	executeContext: IExecuteFunctions,
+	itemIndex: number,
+	client: QBittorrentClient,
+) {
+	const options = executeContext.getNodeParameter('options', itemIndex, {}) as GetMainLogOptions;
+	return client.getMainLog(options);
+}
+
+export async function getPeerLog(
+	executeContext: IExecuteFunctions,
+	itemIndex: number,
+	client: QBittorrentClient,
+) {
+	const options = executeContext.getNodeParameter('options', itemIndex, {}) as GetPeerLogOptions;
+	return client.getPeerLog(options);
 }
