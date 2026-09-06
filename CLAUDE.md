@@ -71,3 +71,9 @@ Prettier with tabs, single quotes, 100 columns, trailing commas (`.prettierrc.js
 ## Language
 
 This is an open source project — anyone should be able to use it and contribute. **All content must be written in English**: code (identifiers, strings), comments, documentation, commit messages, branch names, pull requests, issues, and any user-facing text. Write in English even when the conversation with the user is in another language.
+
+## Agent conventions
+
+`.claude/skills/` holds the project skills: `pr-feedback` (working through PR review threads) and `gh-comment` (posting anything to GitHub). `.claude/rules/` holds cross-cutting rules generalized from review feedback; each one is imported from this file with an `@.claude/rules/<topic>.md` line.
+
+Every GitHub comment posted by the agent — review thread reply, PR or issue comment, automated message — starts with `(Claude) ` on its first line, so a reader can tell agent output from a human's. The prefix is a marker: never translated, never reworded, present even on a one-line reply.
