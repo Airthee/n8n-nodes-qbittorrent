@@ -39,11 +39,12 @@
 		]
 	},
 	"devDependencies": {
+		"@types/node": "^22.20.1",
 		"@typescript-eslint/parser": "~8.46",
 		"eslint-plugin-n8n-nodes-base": "^1.11.0",
 		"gulp": "^5.0.1",
-		"n8n-core": "*",
-		"n8n-workflow": "*",
+		"n8n-core": "^2.37.5",
+		"n8n-workflow": "^2.37.4",
 		"prettier": "^3.6.2",
 		"release-it": "^21.0.2",
 		"typescript": "~5.9.2",
