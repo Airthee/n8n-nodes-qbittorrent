@@ -1,6 +1,6 @@
 ---
 name: gh-comment
-description: Use when posting anything to GitHub as the agent - replying in a pull request review thread, commenting on a PR or an issue, or sending an automated message.
+description: Use when posting a comment to GitHub as the agent - replying in a pull request review thread, commenting on a PR or an issue, or sending an automated message.
 ---
 
 # Posting GitHub comments as Claude
@@ -17,6 +17,10 @@ reworded, moved further down, or dropped because the message is short.
 This skill is the single place comments get posted. Any other skill that needs
 to say something on GitHub delegates here instead of calling `gh pr comment`
 itself - that is what keeps the prefix from being forgotten.
+
+**Scope: comments only.** The body of an issue or a pull request the agent
+opens, a milestone description or a release note is not a comment and gets no
+prefix.
 
 ## The contract
 
