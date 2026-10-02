@@ -5,6 +5,7 @@ import { MockHttpHelper } from './__tests__/utils/mock-http-helper';
 const BASE_URL = 'http://qbittorrent.local';
 const USERNAME = 'admin';
 const PASSWORD = 'secret';
+const API_KEY = 'qbt_0123456789abcdef0123456789ab';
 
 describe('qbittorrent-client', () => {
 	let requestHelper: MockHttpHelper;
@@ -93,6 +94,47 @@ describe('qbittorrent-client', () => {
 					}),
 				}),
 			);
+		});
+	});
+
+	describe('API key authentication', () => {
+		function getClientWithApiKey() {
+			return new QBittorrentClient({ baseURL: BASE_URL, requestHelper, apiKey: API_KEY });
+		}
+
+		it('should send the API key as a Bearer token', async () => {
+			await getClientWithApiKey().getTorrentsList();
+
+			expect(requestHelper.request).toHaveBeenCalledWith({
+				method: 'GET',
+				baseURL: BASE_URL,
+				url: '/api/v2/torrents/info',
+				headers: { Authorization: `Bearer ${API_KEY}` },
+				returnFullResponse: true,
+			});
+		});
+
+		it('should never call auth/login, even with a username and password', async () => {
+			const client = new QBittorrentClient({
+				baseURL: BASE_URL,
+				requestHelper,
+				apiKey: API_KEY,
+				auth: { username: USERNAME, password: PASSWORD },
+			});
+			await client.getTorrentsList();
+			await client.getTorrentsList();
+
+			expect(requestHelper.request).not.toHaveBeenCalledWith(
+				expect.objectContaining({ url: '/api/v2/auth/login' }),
+			);
+		});
+
+		it('should not retry when the request is forbidden', async () => {
+			const forbidden = { status: 403 };
+			requestHelper.request.mockRejectedValue(forbidden);
+
+			await expect(getClientWithApiKey().getTorrentsList()).rejects.toBe(forbidden);
+			expect(requestHelper.request).toHaveBeenCalledTimes(1);
 		});
 	});
 

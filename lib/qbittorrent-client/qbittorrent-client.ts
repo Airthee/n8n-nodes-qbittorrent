@@ -26,6 +26,8 @@ export type QBittorrentClientConstructorOptions = {
 		username: string;
 		password: string;
 	};
+	/** qBittorrent ≥ 5.2 API key. When set, it is used instead of `auth`. */
+	apiKey?: string;
 	requestHelper: IRequestHelper;
 };
 
@@ -62,6 +64,12 @@ export class QBittorrentClient {
 			...additionalHeaders,
 		};
 
+		// API key authentication is stateless: no session cookie is involved
+		if (this.options.apiKey) {
+			headers.Authorization = `Bearer ${this.options.apiKey}`;
+			return headers;
+		}
+
 		// If we have a valid cookie, add it to the headers
 		if (this.cookie && this.cookie !== 'session-active') {
 			headers.cookie = this.cookie;
@@ -89,6 +97,10 @@ export class QBittorrentClient {
 		try {
 			return await unsafeDoRequest();
 		} catch (e: any) {
+			// Logging in again cannot fix an invalid API key
+			if (this.options.apiKey) {
+				throw e;
+			}
 			// If the response is "Forbidden", it means that the session has expired
 			if (
 				e === 'Forbidden' ||
