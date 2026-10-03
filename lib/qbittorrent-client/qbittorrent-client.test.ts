@@ -5,6 +5,7 @@ import { MockHttpHelper } from './__tests__/utils/mock-http-helper';
 const BASE_URL = 'http://qbittorrent.local';
 const USERNAME = 'admin';
 const PASSWORD = 'secret';
+const API_KEY = 'qbt_0123456789abcdef0123456789ab';
 
 describe('qbittorrent-client', () => {
 	let requestHelper: MockHttpHelper;
@@ -89,10 +90,53 @@ describe('qbittorrent-client', () => {
 			expect(requestHelper.request).toHaveBeenCalledWith(
 				expect.objectContaining({
 					headers: expect.objectContaining({
-						cookie: 'testCookie',
+						Cookie: 'testCookie',
 					}),
 				}),
 			);
+		});
+	});
+
+	describe('API key authentication', () => {
+		function getClientWithApiKey() {
+			return new QBittorrentClient({ baseURL: BASE_URL, requestHelper, apiKey: API_KEY });
+		}
+
+		it('should send the API key as a Bearer token', async () => {
+			await getClientWithApiKey().getTorrentsList();
+
+			expect(requestHelper.request).toHaveBeenCalledWith({
+				method: 'GET',
+				baseURL: BASE_URL,
+				url: '/api/v2/torrents/info',
+				headers: { Authorization: `Bearer ${API_KEY}` },
+				returnFullResponse: true,
+			});
+		});
+
+		it('should throw a clear error instead of logging in when the API key is blank', async () => {
+			const client = new QBittorrentClient({ baseURL: BASE_URL, requestHelper, apiKey: '   ' });
+
+			await expect(client.getTorrentsList()).rejects.toThrow('API key');
+			expect(requestHelper.request).not.toHaveBeenCalled();
+		});
+
+		it('should not retry when the request is forbidden', async () => {
+			const forbidden = { status: 403 };
+			requestHelper.request.mockRejectedValue(forbidden);
+
+			await expect(getClientWithApiKey().getTorrentsList()).rejects.toBe(forbidden);
+			expect(requestHelper.request).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	describe('anonymous access', () => {
+		it('should not try to log in when the request is forbidden', async () => {
+			const forbidden = { status: 403 };
+			requestHelper.request.mockRejectedValue(forbidden);
+
+			await expect(getClient().getTorrentsList()).rejects.toBe(forbidden);
+			expect(requestHelper.request).toHaveBeenCalledTimes(1);
 		});
 	});
 

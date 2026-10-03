@@ -37,7 +37,7 @@ Three layers, deliberately separated so the API client is testable without n8n:
 
 1. **`lib/qbittorrent-client/`** — framework-agnostic qBittorrent API client. It never imports `n8n-workflow`. All HTTP goes through the injected `IRequestHelper` (`interfaces/request-helper.interface.ts`), which n8n satisfies with `this.helpers.httpRequest`, and tests satisfy with `__tests__/utils/mock-http-helper.ts`. This is the layer with unit tests.
 2. **`nodes/QBittorrent/`** — the n8n node. `QBittorrent.node.ts` holds the `INodeTypeDescription` and the execute loop; `operations/index.ts` and `fields/index.ts` are the UI property arrays; `QBittorrent.actions.ts` maps operation names to client calls.
-3. **`credentials/QBittorrentApi.credentials.ts`** + **`helpers/qbittorrent-client-instanciate.ts`** — credential definition and the shared client factory used by `preAuthentication`.
+3. **`credentials/QBittorrentApi.credentials.ts`** + **`helpers/qbittorrent-client-instanciate.ts`** — credential definition and the shared client factory. `getQBittorrentClientOptions` is the single place that turns a credential into client options (and trims the API key); the node's execute loop and the credential's `preAuthentication` both go through it.
 
 ### Operation dispatch
 
@@ -56,13 +56,15 @@ Two eslint rules from `eslint-plugin-n8n-nodes-base` bite here: option lists mus
 
 `QBittorrentClient` funnels requests through three private helpers — `getJson` (GET + query string), `postForm` (POST + `application/x-www-form-urlencoded`), and `doRequest` (adds `returnFullResponse: true`). Prefer `getJson`/`postForm` over hand-rolling `RequestOptions`; `addTorrent` is the exception because it posts `multipart/form-data`.
 
-**Session handling**: `buildHeaders` lazily logs in via `POST /api/v2/auth/login` on the first authenticated call and caches the `set-cookie` value on the instance. `doRequest` retries once, re-fetching the cookie, when the response is `403`/`'Forbidden'` — so an expired session self-heals. Do not add cookie logic in the action layer.
+**Authentication modes**: `QBittorrentClientConstructorOptions` is a discriminated union — `auth` (username/password), `apiKey` (qBittorrent ≥ 5.2, sent as `Authorization: Bearer` on every request, no login, no cookie) or neither (anonymous access). Both the client and the credential's `authenticate` build the header through `lib/qbittorrent-client/utils/auth-headers.ts`, which rejects a blank API key; keep that the only place that knows which header to send.
+
+**Session handling** (username/password mode only): `buildHeaders` lazily logs in via `POST /api/v2/auth/login` on the first authenticated call and caches the `set-cookie` value on the instance. `doRequest` retries once, re-fetching the cookie, when the response is `403`/`'Forbidden'` — so an expired session self-heals. The retry is gated on `auth` being present: an API key or anonymous client just rethrows. Do not add cookie logic in the action layer.
 
 **Version routing**: qBittorrent 5.0 renamed `torrents/pause`→`torrents/stop` and `torrents/resume`→`torrents/start`. `isApiV5OrNewer()` reads `GET /api/v2/app/version` once per client and caches the major version, defaulting to 5 on any parse or request failure. 5.x is the supported target; the 4.x fallback is best-effort and may be dropped. If a future qBittorrent release renames more routes, extend this method rather than branching in the actions.
 
 ### Client caching across executions
 
-`QBittorrent.getClientInstance` keeps a **single static client** on the class, keyed by a SHA-512 of `url-username-password`. Changing credentials swaps the instance; the same credentials reuse it (and therefore reuse its cookie and cached version). This is process-wide state — keep that in mind when adding per-execution state to `QBittorrentClient`, since it will leak across workflow runs.
+`QBittorrent.getClientInstance` keeps a **single static client** on the class, keyed by a SHA-512 of `url-username-password-apiKey`. Changing credentials swaps the instance; the same credentials reuse it (and therefore reuse its cookie and cached version). This is process-wide state — keep that in mind when adding per-execution state to `QBittorrentClient`, since it will leak across workflow runs.
 
 ## Style
 

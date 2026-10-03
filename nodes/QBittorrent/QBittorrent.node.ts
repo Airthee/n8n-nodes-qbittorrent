@@ -19,6 +19,7 @@ import {
 	QBittorrentClientConstructorOptions,
 } from '../../lib/qbittorrent-client/qbittorrent-client';
 import { sha512 } from '../../lib/qbittorrent-client/utils/sha512';
+import { getQBittorrentClientOptions } from '../../helpers/qbittorrent-client-instanciate';
 import { operations } from './operations';
 import { fields } from './fields';
 
@@ -101,14 +102,9 @@ export class QBittorrent implements INodeType {
 					QBittorrentApiName,
 					i,
 				)) as QBittorrentApiCredentials;
-				const client = await QBittorrent.getClientInstance({
-					baseURL: credentials.url as string,
-					requestHelper: { request: this.helpers.httpRequest },
-					auth: {
-						username: credentials.username,
-						password: credentials.password,
-					},
-				});
+				const client = await QBittorrent.getClientInstance(
+					getQBittorrentClientOptions({ request: this.helpers.httpRequest }, credentials),
+				);
 
 				const operation = this.getNodeParameter('operation', i) as keyof typeof actions;
 				const action = actions[operation];
@@ -134,7 +130,7 @@ export class QBittorrent implements INodeType {
 	}
 
 	public static async getClientInstance(options: QBittorrentClientConstructorOptions) {
-		const clearIdentifier = `${options.baseURL}-${options.auth?.username}-${options.auth?.password}`;
+		const clearIdentifier = `${options.baseURL}-${options.auth?.username}-${options.auth?.password}-${options.apiKey}`;
 		const hash = await sha512(clearIdentifier);
 
 		if (QBittorrent.client?.identifier !== hash) {

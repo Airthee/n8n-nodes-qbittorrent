@@ -68,12 +68,21 @@ list of hashes (`hash1|hash2`), or `all` to target every torrent.
 
 ## Credentials
 
-Before using a node, you have to add a credential.  
-This credential should be your server address and the username / password that have access to the web UI.
+Before using a node, you have to add a credential with your server address and one of the two authentication methods below.
 
 Make sure you don't include a slash at the end of the URL, otherwise you may encounter 404 errors when performing various operations.
 
+### Username / Password
+
+The default method. Use the username and password that have access to the web UI.
+
 The node logs in once and reuses the session cookie, refreshing it automatically when the session expires.
+
+### API Key
+
+Requires **qBittorrent 5.2.0 or newer**. Generate a key in qBittorrent under **Preferences → WebUI → API Key**, then paste it in the credential.
+
+The key is sent as an `Authorization: Bearer` header on every request, so no login or session cookie is involved. qBittorrent keeps a single key at a time: if you rotate it, update the credential, since the previous key stops working immediately.
 
 ## Compatibility
 
