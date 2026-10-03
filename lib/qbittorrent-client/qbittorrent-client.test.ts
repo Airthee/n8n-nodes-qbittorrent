@@ -90,7 +90,7 @@ describe('qbittorrent-client', () => {
 			expect(requestHelper.request).toHaveBeenCalledWith(
 				expect.objectContaining({
 					headers: expect.objectContaining({
-						cookie: 'testCookie',
+						Cookie: 'testCookie',
 					}),
 				}),
 			);
@@ -114,19 +114,11 @@ describe('qbittorrent-client', () => {
 			});
 		});
 
-		it('should never call auth/login, even with a username and password', async () => {
-			const client = new QBittorrentClient({
-				baseURL: BASE_URL,
-				requestHelper,
-				apiKey: API_KEY,
-				auth: { username: USERNAME, password: PASSWORD },
-			});
-			await client.getTorrentsList();
-			await client.getTorrentsList();
+		it('should throw a clear error instead of logging in when the API key is blank', async () => {
+			const client = new QBittorrentClient({ baseURL: BASE_URL, requestHelper, apiKey: '   ' });
 
-			expect(requestHelper.request).not.toHaveBeenCalledWith(
-				expect.objectContaining({ url: '/api/v2/auth/login' }),
-			);
+			await expect(client.getTorrentsList()).rejects.toThrow('API key');
+			expect(requestHelper.request).not.toHaveBeenCalled();
 		});
 
 		it('should not retry when the request is forbidden', async () => {
@@ -134,6 +126,16 @@ describe('qbittorrent-client', () => {
 			requestHelper.request.mockRejectedValue(forbidden);
 
 			await expect(getClientWithApiKey().getTorrentsList()).rejects.toBe(forbidden);
+			expect(requestHelper.request).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	describe('anonymous access', () => {
+		it('should not try to log in when the request is forbidden', async () => {
+			const forbidden = { status: 403 };
+			requestHelper.request.mockRejectedValue(forbidden);
+
+			await expect(getClient().getTorrentsList()).rejects.toBe(forbidden);
 			expect(requestHelper.request).toHaveBeenCalledTimes(1);
 		});
 	});

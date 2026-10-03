@@ -1,5 +1,6 @@
 import { IRequestHelper, RequestOptions } from './interfaces/request-helper.interface';
 import { filterEmptyValues } from './utils/object';
+import { buildAuthHeaders } from './utils/auth-headers';
 
 export type AddTorrentOptions = {
 	urls: string;
@@ -20,16 +21,21 @@ export type AddTorrentOptions = {
 	firstLastPiecePrio?: boolean;
 };
 
+/**
+ * Exactly one authentication mode per client:
+ * - `auth`: username and password, exchanged for a session cookie on `/api/v2/auth/login`;
+ * - `apiKey`: qBittorrent ≥ 5.2 API key, sent as a Bearer token on every request;
+ * - neither: anonymous access, for a WebUI that bypasses authentication for this host.
+ */
+export type QBittorrentClientAuthOptions =
+	| { auth: { username: string; password: string }; apiKey?: never }
+	| { apiKey: string; auth?: never }
+	| { auth?: never; apiKey?: never };
+
 export type QBittorrentClientConstructorOptions = {
 	baseURL: string;
-	auth?: {
-		username: string;
-		password: string;
-	};
-	/** qBittorrent ≥ 5.2 API key. When set, it is used instead of `auth`. */
-	apiKey?: string;
 	requestHelper: IRequestHelper;
-};
+} & QBittorrentClientAuthOptions;
 
 export class QBittorrentClient {
 	private cookie: string | null = null;
@@ -47,8 +53,8 @@ export class QBittorrentClient {
 			baseURL: this.options.baseURL,
 			url: '/api/v2/auth/login',
 			body: new URLSearchParams({
-				username: this.options.auth?.username as string,
-				password: this.options.auth?.password as string,
+				username: this.options.auth?.username ?? '',
+				password: this.options.auth?.password ?? '',
 			}),
 		};
 
@@ -65,20 +71,18 @@ export class QBittorrentClient {
 		};
 
 		// API key authentication is stateless: no session cookie is involved
-		if (this.options.apiKey) {
-			headers.Authorization = `Bearer ${this.options.apiKey}`;
-			return headers;
+		if (this.options.apiKey !== undefined) {
+			return { ...headers, ...buildAuthHeaders({ apiKey: this.options.apiKey }) };
 		}
 
 		// If we have a valid cookie, add it to the headers
 		if (this.cookie && this.cookie !== 'session-active') {
-			headers.cookie = this.cookie;
+			return { ...headers, ...buildAuthHeaders({ cookie: this.cookie }) };
 		}
 
 		// If we don't have a cookie and authentication is required
 		if (this.options.auth && this.cookie === null) {
-			const cookie = await this.fetchCookie();
-			headers.cookie = cookie;
+			return { ...headers, ...buildAuthHeaders({ cookie: await this.fetchCookie() }) };
 		}
 
 		return headers;
@@ -97,8 +101,8 @@ export class QBittorrentClient {
 		try {
 			return await unsafeDoRequest();
 		} catch (e: any) {
-			// Logging in again cannot fix an invalid API key
-			if (this.options.apiKey) {
+			// Only a username/password session can be refreshed by logging in again
+			if (!this.options.auth) {
 				throw e;
 			}
 			// If the response is "Forbidden", it means that the session has expired

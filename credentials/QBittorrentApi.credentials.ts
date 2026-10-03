@@ -7,9 +7,11 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 import {
+	getApiKey,
 	instanciateQBittorrentClient,
 	isApiKeyAuthentication,
 } from '../helpers/qbittorrent-client-instanciate';
+import { buildAuthHeaders } from '../lib/qbittorrent-client/utils/auth-headers';
 
 export const QBittorrentApiName = 'qBittorrentApi';
 
@@ -17,9 +19,12 @@ export type QBittorrentApiCredentials = {
 	url: string;
 	/** Missing on credentials saved before API key authentication was added. */
 	authentication?: 'usernamePassword' | 'apiKey';
-	username: string;
-	password: string;
-	apiKey: string;
+	/** Only set in username/password mode. */
+	username?: string;
+	/** Only set in username/password mode. */
+	password?: string;
+	/** Only set in API key mode. */
+	apiKey?: string;
 	cookie: string;
 };
 
@@ -116,13 +121,14 @@ export class QBittorrentApi implements ICredentialType {
 		credentials: ICredentialDataDecryptedObject,
 		requestOptions: IHttpRequestOptions,
 	): Promise<IHttpRequestOptions> {
-		const authHeader = isApiKeyAuthentication(credentials as QBittorrentApiCredentials)
-			? { Authorization: `Bearer ${credentials.apiKey}` }
-			: { Cookie: credentials.cookie as string };
+		const typedCredentials = credentials as QBittorrentApiCredentials;
+		const authHeaders = isApiKeyAuthentication(typedCredentials)
+			? buildAuthHeaders({ apiKey: getApiKey(typedCredentials) })
+			: buildAuthHeaders({ cookie: typedCredentials.cookie });
 
 		return {
 			...requestOptions,
-			headers: { ...requestOptions.headers, ...authHeader },
+			headers: { ...requestOptions.headers, ...authHeaders },
 		};
 	}
 

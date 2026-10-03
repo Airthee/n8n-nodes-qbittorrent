@@ -10,24 +10,26 @@ export function isApiKeyAuthentication(credentials: QBittorrentApiCredentials) {
 	return credentials.authentication === 'apiKey';
 }
 
+/** The API key as pasted by the user, without surrounding whitespace. */
+export function getApiKey(credentials: QBittorrentApiCredentials) {
+	return (credentials.apiKey ?? '').trim();
+}
+
 export function getQBittorrentClientOptions(
 	requestHelper: IRequestHelper,
 	credentials: QBittorrentApiCredentials,
 ): QBittorrentClientConstructorOptions {
+	const base = { baseURL: credentials.url, requestHelper };
+
 	if (isApiKeyAuthentication(credentials)) {
-		return {
-			baseURL: credentials.url as string,
-			requestHelper,
-			apiKey: credentials.apiKey as string,
-		};
+		return { ...base, apiKey: getApiKey(credentials) };
 	}
 
 	return {
-		baseURL: credentials.url as string,
-		requestHelper,
+		...base,
 		auth: {
-			username: credentials.username as string,
-			password: credentials.password as string,
+			username: credentials.username ?? '',
+			password: credentials.password ?? '',
 		},
 	};
 }

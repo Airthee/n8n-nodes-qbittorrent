@@ -48,6 +48,16 @@ describe('QBittorrentApi credentials', () => {
 
 			expect(options.headers).toEqual({ Authorization: `Bearer ${API_KEY}` });
 		});
+
+		it('should trim the API key', async () => {
+			const options = await authenticate({ ...apiKeyCredentials, apiKey: ` ${API_KEY}\n` });
+
+			expect(options.headers).toEqual({ Authorization: `Bearer ${API_KEY}` });
+		});
+
+		it('should fail clearly when the API key is blank', async () => {
+			await expect(authenticate({ ...apiKeyCredentials, apiKey: '' })).rejects.toThrow('API key');
+		});
 	});
 
 	describe('preAuthentication', () => {
