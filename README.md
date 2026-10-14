@@ -63,6 +63,18 @@ In short, from your n8n instance: **Settings → Community nodes → Install**, 
 | `getBuildInfo`   | Get build info              |
 | `getPreferences` | Get application preferences |
 
+### Log
+
+| Operation    | Description      |
+| ------------ | ---------------- |
+| `getMainLog` | Get the main log |
+| `getPeerLog` | Get the peer log |
+
+Both log operations accept an optional **Options** collection. For the main log, `normal`,
+`info`, `warning` and `critical` filter the severities returned (all enabled by default),
+and `last_known_id` returns only the entries with an ID greater than the one given
+(`-1` by default, meaning every entry). The peer log accepts `last_known_id` only.
+
 Operations acting on several torrents take a **Torrent Hashes** parameter: a pipe-separated
 list of hashes (`hash1|hash2`), or `all` to target every torrent.
 

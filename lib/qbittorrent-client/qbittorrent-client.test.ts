@@ -223,4 +223,84 @@ describe('qbittorrent-client', () => {
 			});
 		});
 	});
+
+	describe('log', () => {
+		it('should GET /log/main without a query string when no option is given', async () => {
+			await getClient().getMainLog();
+
+			expect(requestHelper.request).toHaveBeenCalledWith({
+				method: 'GET',
+				baseURL: BASE_URL,
+				url: '/api/v2/log/main',
+				headers: {},
+				returnFullResponse: true,
+			});
+		});
+
+		it('should GET /log/main with the provided options as query string', async () => {
+			await getClient().getMainLog({
+				normal: false,
+				info: true,
+				warning: false,
+				critical: true,
+				last_known_id: 42,
+			});
+
+			expect(requestHelper.request).toHaveBeenCalledWith({
+				method: 'GET',
+				baseURL: BASE_URL,
+				url: '/api/v2/log/main?normal=false&info=true&warning=false&critical=true&last_known_id=42',
+				headers: {},
+				returnFullResponse: true,
+			});
+		});
+
+		it('should GET /log/main with only the options that were provided', async () => {
+			await getClient().getMainLog({ warning: true });
+
+			expect(requestHelper.request).toHaveBeenCalledWith({
+				method: 'GET',
+				baseURL: BASE_URL,
+				url: '/api/v2/log/main?warning=true',
+				headers: {},
+				returnFullResponse: true,
+			});
+		});
+
+		it('should keep last_known_id when it is 0', async () => {
+			await getClient().getMainLog({ last_known_id: 0 });
+
+			expect(requestHelper.request).toHaveBeenCalledWith({
+				method: 'GET',
+				baseURL: BASE_URL,
+				url: '/api/v2/log/main?last_known_id=0',
+				headers: {},
+				returnFullResponse: true,
+			});
+		});
+
+		it('should GET /log/peers with last_known_id as query string', async () => {
+			await getClient().getPeerLog({ last_known_id: 42 });
+
+			expect(requestHelper.request).toHaveBeenCalledWith({
+				method: 'GET',
+				baseURL: BASE_URL,
+				url: '/api/v2/log/peers?last_known_id=42',
+				headers: {},
+				returnFullResponse: true,
+			});
+		});
+
+		it('should GET /log/peers without a query string when no option is given', async () => {
+			await getClient().getPeerLog();
+
+			expect(requestHelper.request).toHaveBeenCalledWith({
+				method: 'GET',
+				baseURL: BASE_URL,
+				url: '/api/v2/log/peers',
+				headers: {},
+				returnFullResponse: true,
+			});
+		});
+	});
 });

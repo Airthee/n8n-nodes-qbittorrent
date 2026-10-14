@@ -20,6 +20,18 @@ export type AddTorrentOptions = {
 	firstLastPiecePrio?: boolean;
 };
 
+export type GetMainLogOptions = {
+	normal?: boolean;
+	info?: boolean;
+	warning?: boolean;
+	critical?: boolean;
+	last_known_id?: number;
+};
+
+export type GetPeerLogOptions = {
+	last_known_id?: number;
+};
+
 export type QBittorrentClientConstructorOptions = {
 	baseURL: string;
 	auth?: {
@@ -113,13 +125,6 @@ export class QBittorrentClient {
 	}
 
 	public async addTorrent(options: AddTorrentOptions) {
-		const getBooleanValue = (value?: boolean) => {
-			if (value !== undefined) {
-				return value ? 'true' : 'false';
-			}
-			return value;
-		};
-
 		const body = {
 			urls: options.urls,
 			...filterEmptyValues({
@@ -127,17 +132,17 @@ export class QBittorrentClient {
 				cookie: options.cookie,
 				category: options.category,
 				tags: options.tags,
-				skip_checking: getBooleanValue(options.skip_checking),
-				paused: getBooleanValue(options.paused),
+				skip_checking: this.toFormBoolean(options.skip_checking),
+				paused: this.toFormBoolean(options.paused),
 				root_folder: options.root_folder,
 				rename: options.rename,
 				upLimit: options.upLimit?.toString(),
 				dlLimit: options.dlLimit?.toString(),
 				ratioLimit: options.ratioLimit?.toString(),
 				seedingTimeLimit: options.seedingTimeLimit?.toString(),
-				autoTMM: getBooleanValue(options.autoTMM),
-				sequentialDownload: getBooleanValue(options.sequentialDownload),
-				firstLastPiecePrio: getBooleanValue(options.firstLastPiecePrio),
+				autoTMM: this.toFormBoolean(options.autoTMM),
+				sequentialDownload: this.toFormBoolean(options.sequentialDownload),
+				firstLastPiecePrio: this.toFormBoolean(options.firstLastPiecePrio),
 			}),
 		};
 
@@ -179,9 +184,18 @@ export class QBittorrentClient {
 		return form;
 	}
 
-	/** GET request, with an optional query string. */
+	/** Serialize an optional boolean for a form body or a query string. */
+	private toFormBoolean(value?: boolean) {
+		if (value === undefined) {
+			return undefined;
+		}
+		return value ? 'true' : 'false';
+	}
+
+	/** GET request, with an optional query string. An empty query adds no "?". */
 	private async getJson(url: string, query?: Record<string, string>) {
-		const queryString = query ? `?${new URLSearchParams(query).toString()}` : '';
+		const queryString =
+			query && Object.keys(query).length ? `?${new URLSearchParams(query).toString()}` : '';
 		const requestOptions: RequestOptions = {
 			method: 'GET',
 			baseURL: this.options.baseURL,
@@ -344,5 +358,31 @@ export class QBittorrentClient {
 
 	public async getPreferences() {
 		return this.getJson('/api/v2/app/preferences');
+	}
+
+	// ----------------------------------------------------------------
+	//  Log
+	// ----------------------------------------------------------------
+
+	public async getMainLog(options: GetMainLogOptions = {}) {
+		return this.getJson(
+			'/api/v2/log/main',
+			filterEmptyValues({
+				normal: this.toFormBoolean(options.normal),
+				info: this.toFormBoolean(options.info),
+				warning: this.toFormBoolean(options.warning),
+				critical: this.toFormBoolean(options.critical),
+				last_known_id: options.last_known_id?.toString(),
+			}),
+		);
+	}
+
+	public async getPeerLog(options: GetPeerLogOptions = {}) {
+		return this.getJson(
+			'/api/v2/log/peers',
+			filterEmptyValues({
+				last_known_id: options.last_known_id?.toString(),
+			}),
+		);
 	}
 }
