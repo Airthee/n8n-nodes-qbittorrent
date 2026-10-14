@@ -47,7 +47,7 @@
 		"n8n-workflow": "stable",
 		"prettier": "^3.6.2",
 		"release-it": "^21.0.2",
-		"typescript": "~5.9.2",
+		"typescript": "~7.0.2",
 		"vitest": "^3.2.4"
 	}
 }
