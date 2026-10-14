@@ -8,8 +8,8 @@ export type AddTorrentOptions = {
 	category?: string;
 	tags?: string;
 	skip_checking?: boolean;
-	paused?: boolean;
-	root_folder?: string;
+	stopped?: boolean;
+	contentLayout?: string;
 	rename?: string;
 	upLimit?: number;
 	dlLimit?: number;
@@ -31,8 +31,6 @@ export type QBittorrentClientConstructorOptions = {
 
 export class QBittorrentClient {
 	private cookie: string | null = null;
-
-	private apiMajorVersion?: number;
 
 	constructor(private readonly options: QBittorrentClientConstructorOptions) {}
 
@@ -128,8 +126,8 @@ export class QBittorrentClient {
 				category: options.category,
 				tags: options.tags,
 				skip_checking: getBooleanValue(options.skip_checking),
-				paused: getBooleanValue(options.paused),
-				root_folder: options.root_folder,
+				stopped: getBooleanValue(options.stopped),
+				contentLayout: options.contentLayout,
 				rename: options.rename,
 				upLimit: options.upLimit?.toString(),
 				dlLimit: options.dlLimit?.toString(),
@@ -207,40 +205,16 @@ export class QBittorrentClient {
 		return await this.doRequest(requestOptions);
 	}
 
-	/**
-	 * Detect the qBittorrent major version (cached for the client's lifetime).
-	 * qBittorrent 5.0 renamed several torrent-control routes, so callers can
-	 * pick the right endpoint. Falls back to 5 (modern routes) if the version
-	 * string can't be read.
-	 */
-	private async isApiV5OrNewer(): Promise<boolean> {
-		if (this.apiMajorVersion === undefined) {
-			try {
-				const res = await this.getAppVersion();
-				const raw = typeof res === 'string' ? res : (res?.body ?? '');
-				const match = String(raw).match(/(\d+)/);
-				this.apiMajorVersion = match ? parseInt(match[1], 10) : 5;
-			} catch {
-				this.apiMajorVersion = 5;
-			}
-		}
-		return this.apiMajorVersion >= 5;
-	}
-
 	// ----------------------------------------------------------------
 	//  Torrent control
 	// ----------------------------------------------------------------
 
-	public async pauseTorrents(hashes: string) {
-		// qBittorrent 5.0 renamed pause → stop; on 4.x the /stop route 404s.
-		const action = (await this.isApiV5OrNewer()) ? 'stop' : 'pause';
-		return this.postForm(`/api/v2/torrents/${action}`, { hashes });
+	public async stopTorrents(hashes: string) {
+		return this.postForm('/api/v2/torrents/stop', { hashes });
 	}
 
-	public async resumeTorrents(hashes: string) {
-		// qBittorrent 5.0 renamed resume → start; on 4.x the /start route 404s.
-		const action = (await this.isApiV5OrNewer()) ? 'start' : 'resume';
-		return this.postForm(`/api/v2/torrents/${action}`, { hashes });
+	public async startTorrents(hashes: string) {
+		return this.postForm('/api/v2/torrents/start', { hashes });
 	}
 
 	public async deleteTorrents(hashes: string, deleteFiles: boolean) {
